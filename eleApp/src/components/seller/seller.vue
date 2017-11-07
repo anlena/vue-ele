@@ -1,5 +1,5 @@
 <template>
-  <div>seller</div>
+  <div>goods</div>
 </template>
 
 <script>
@@ -11,5 +11,4 @@ export default {
 <style lang="stylus" rel="stylesheet/stylus">
 
 </style>
-
 

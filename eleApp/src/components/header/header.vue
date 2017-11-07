@@ -2,63 +2,89 @@
   <div class="header">
 		<div class="content-wrapper">
 			<div class="avatar">
-				<img width="64" height="64" src="./avatar.jpg" alt="">
+				<img width="64" height="64" :src="seller.avatar" alt="">
 			</div>
 			<div class="content">
 				<div class="title">
 					<span class="brand"></span>
-					<span class="name">粥品香坊(亚运村)</span>
+					<span class="name">{{seller.name}}</span>
 				</div>
 				<div class="description">
-					蜂鸟转送/38分钟到达
+					{{seller.description}}/{{seller.deliveryTime}}分钟到达
 				</div>
-				<div class="support">
-					<span class="icon descrease"></span>
-					<span class="text">在线支付满28减5，满50减10</span>
+				<div class="support" v-if="seller.supports">
+					<span class="icon" :class="classMap[seller.supports[0].type]"></span>
+					<span class="text">{{seller.supports[0].description}}</span>
 				</div>
 			</div>
-			<div class="supports_count">
-				<span class="count">5个</span>
+			<div class="supports_count" v-if="seller.supports" @click="showDetaitl(true)">
+				<span class="count">{{seller.supports.length}}个</span>
 				<span class="icon-keyboard_arrow_right"></span>
 			</div>
 		</div>
-		<div class="bulletin-wrapper">
+		<div class="bulletin-wrapper" @click="showDetaitl(true)">
 			<span class="bulletin-title"></span>
-			<span class="bulletin-text">粥品香坊其烹饪粥料的秘方来源于中国千年古法，再融合现代工艺制作而成</span>
+			<span class="bulletin-text">{{seller.bulletin}}</span>
 			<i class="keyboard_arrow_right"></i>
 		</div>
 		<div class="background">
-			<img width="100%" height="100%" src="./avatar.jpg" alt="">
+			<img width="100%" height="100%" :src="seller.avatar" alt="">
 		</div>
-		<div class="detail">
+		<div class="detail" v-show="detailShow">
 			<div class="detail-wrapper">
-				<div class="detail-main">
-					<div class="name">粥品香坊(亚运村)</div>
-					<div class="star-wrapper">star组件内容</div>
-					<div class="title"></div>
-					<div class="text">优惠信息</div>
-					<div class="line"></div>
-				</div>
-				<ul class="supports">
-					<li class="support">
-						<span class="icon"></span>
-						<span class="text"></span>	
-					</li>
-				</ul>
-				<div class="content">
-					<p></p>
+				<div class="detail-main clearfix">
+					<div class="name">{{seller.name}}</div>
+					<div class="star-wrapper">
+						<star :score="seller.score" :size="48"></star>
+					</div>
+					<div class="title">
+						<div class="line"></div>
+						<div class="text">优惠信息</div>
+						<div class="line"></div>
+					</div>
+					<ul class="supports" v-if="seller.supports">
+						<li class="support" v-for="(item,index) in seller.supports" :key="index">
+							<span class="icon" :class="classMap[item.type]"></span>
+							<span class="text">{{item.description}}</span>	
+						</li>
+					</ul>
+					<div class="title">
+            <div class="line"></div>
+            <div class="text">商家公告</div>
+            <div class="line"></div>
+          </div>
+					<div class="content">
+						<p>{{seller.bulletin}}</p>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div class="detail-close">
-			<span class="icon-close"></span>
+			<div class="detail-close" @click="showDetaitl(false)">
+				<span class="icon-close"></span>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
+import star from '../star/star'
 export default {
-
+	props:['seller'],
+	data(){
+		return{
+			detailShow:false
+		}
+	},
+	created (){
+		this.classMap = ["decrease", "discount", "guarantee", "invoice", "special"];
+	},
+	methods:{
+		showDetaitl(isShow){
+			this.detailShow = isShow;
+		}
+	},
+	components:{
+		star
+	}
 }
 </script>
 
@@ -112,7 +138,7 @@ export default {
 						height 12px
 						background-size 12px 12px
 						background-repeat no-repeat
-						&.descrease
+						&.decrease
 							bg-image(decrease_1)
 						&.discount
 							bg-image(discount_1)
@@ -145,7 +171,6 @@ export default {
 					font-size 10px
 					line-height 12px
 					font-weight 200
-			
 		.bulletin-wrapper
 			background-color rgba(7,17,27,0.2)
 			padding	0 12px
@@ -169,7 +194,6 @@ export default {
 				right 12px
 				bottom 9px
 				font-size 10px
-		
 		.background
 			position absolute
 			left 0
@@ -217,32 +241,49 @@ export default {
 							position relative
 							top -6px
 							border-bottom 2px solid rgba(255,192,203,0.3)
-        .supports
-					width 80%
-					padding 0 12px
-					margin 0 auto
-					.support
-						margin-bottom 12px
-						&:last-child
-							margin-bottom 0
-						.icon
-							display inline-block
-							width 16px
-							height 16px
-							background-size 16px 16px
-							background-repeat no-repeat
-							vertical-align top
-							margin-right 6px
-							&.discount
-								bg-image(discount_2)
-							&.decrease
-								bg-image(decrease_2)
-							&.discount
-								bg-image(discount_2)
-							&.discount
-								bg-image(discount_2)
-							&.discount
-								bg-image(discount_2)
+					.supports
+						width 80%
+						padding 0 12px
+						margin 0 auto
+						.support
+							margin-bottom 12px
+							&:last-child
+								margin-bottom 0
+							.icon
+								display inline-block
+								width 16px
+								height 16px
+								background-size 16px 16px
+								background-repeat no-repeat
+								vertical-align top
+								margin-right 6px
+								&.discount
+									bg-image(discount_2)
+								&.decrease
+									bg-image(decrease_2)
+								&.guarantee
+									bg-image(guarantee_2)
+								&.invoice
+									bg-image(invoice_2)
+								&.special
+									bg-image(special_2)
+							.text
+								font-size 12px
+								line-height 12px
+								font-weight 200
+					.content
+						width 80%
+						padding 0 12px
+						margin 0 auto
+						font-size 12px
+						line-height 24px
+			.detail-close
+				margin-top -130px
+				clear both
+				text-align center
+				.icon-close
+					display inline-block
+					width 32px
+					height 32px
+					font-size 32px
 </style>
-
-
