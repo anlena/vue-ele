@@ -138,7 +138,7 @@ export default {
           food.count++;
         }
         //通知shopcart组件对象启动一个小球的显示动画
-
+        this.$refs.shopcart.drop(event.target)
       }else{  //减少
         if(food.count)
         food.count --

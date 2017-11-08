@@ -30,38 +30,40 @@
 		<div class="background">
 			<img width="100%" height="100%" :src="seller.avatar" alt="">
 		</div>
-		<div class="detail" v-show="detailShow">
-			<div class="detail-wrapper">
-				<div class="detail-main clearfix">
-					<div class="name">{{seller.name}}</div>
-					<div class="star-wrapper">
-						<star :score="seller.score" :size="48"></star>
-					</div>
-					<div class="title">
-						<div class="line"></div>
-						<div class="text">优惠信息</div>
-						<div class="line"></div>
-					</div>
-					<ul class="supports" v-if="seller.supports">
-						<li class="support" v-for="(item,index) in seller.supports" :key="index">
-							<span class="icon" :class="classMap[item.type]"></span>
-							<span class="text">{{item.description}}</span>	
-						</li>
-					</ul>
-					<div class="title">
-            <div class="line"></div>
-            <div class="text">商家公告</div>
-            <div class="line"></div>
-          </div>
-					<div class="content">
-						<p>{{seller.bulletin}}</p>
+		<transition name="fade">
+			<div class="detail" v-show="detailShow">
+				<div class="detail-wrapper">
+					<div class="detail-main clearfix">
+						<div class="name">{{seller.name}}</div>
+						<div class="star-wrapper">
+							<star :score="seller.score" :size="48"></star>
+						</div>
+						<div class="title">
+							<div class="line"></div>
+							<div class="text">优惠信息</div>
+							<div class="line"></div>
+						</div>
+						<ul class="supports" v-if="seller.supports">
+							<li class="support" v-for="(item,index) in seller.supports" :key="index">
+								<span class="icon" :class="classMap[item.type]"></span>
+								<span class="text">{{item.description}}</span>	
+							</li>
+						</ul>
+						<div class="title">
+							<div class="line"></div>
+							<div class="text">商家公告</div>
+							<div class="line"></div>
+						</div>
+						<div class="content">
+							<p>{{seller.bulletin}}</p>
+						</div>
 					</div>
 				</div>
+				<div class="detail-close" @click="showDetaitl(false)">
+					<span class="icon-close"></span>
+				</div>
 			</div>
-			<div class="detail-close" @click="showDetaitl(false)">
-				<span class="icon-close"></span>
-			</div>
-		</div>
+		</transition>
 	</div>
 </template>
 
@@ -213,6 +215,10 @@ export default {
 			background-color rgba(7,17,27,0.8)
 			overflow auto
 			backdrop-filter blur(10px)
+			&.fade-enter-active,&.fade-leave-active
+				transition opacity .3s linear
+			&.fade-enter,&.fade-leave-to
+				opacity 0
 			transition .5s
 			.detail-wrapper
 				display inline-block

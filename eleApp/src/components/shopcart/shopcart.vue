@@ -1,44 +1,59 @@
 <template>
-  <div class="shopcart">
-    <div class="content">
-      <div class="content-left" @click="toggleList">
-        <div class="logo-wrapper">
-          <div class="logo" :class="{highlight:foodList.length}">
-            <i class="icon-shopping_cart highlight"></i>
+  <div>
+    <div class="shopcart">
+      <div class="content">
+        <div class="content-left" @click="toogleList">
+          <div class="logo-wrapper">
+            <div class="logo" :class="{highlight:foodList.length}">
+              <i class="icon-shopping_cart highlight"></i>
+            </div>
+            <div class="num" v-if="totalCount">{{totalCount}}</div>
           </div>
-          <div class="num" v-if="totalCount">{{totalCount}}</div>
+          <div class="price">￥{{totalPrice}}</div>
+          <div class="desc">另需配送费￥{{deliveryPrice}}元</div>
         </div>
-        <div class="price">￥{{totalPrice}}</div>
-        <div class="desc">另需配送费￥{{deliveryPrice}}元</div>
+        <div class="content-right" @click="pay">
+          <div class="pay" :class="payClass">{{payText}}</div>
+        </div>
       </div>
-      <div class="content-right" @click="pay">
-        <div class="pay" :class="payClass">{{payText}}</div>
+      <div class="ball-container">
+        <transition name="drop" v-for="(ball, index) in balls" :key="index"
+                    @before-enter="beforeDrop"
+                    @enter="dropping"
+                    @after-enter="afterDrop"
+                    v-bind:css="false">
+          <div class="ball"  v-show="ball.isShow">
+            <div class="inner inner-hook"></div>
+          </div>
+        </transition>
       </div>
+      <transition name="fold">
+        <div class="shopcart-list" v-show="listShow">
+          <div class="list-header">
+            <h1 class="title">购物车</h1>
+            <span class="empty" @click="clear">清空</span>
+          </div>
+          <div class="list-content" ref="listContent">
+            <ul>
+              <li class="food" v-for="food in foodList">
+                <span class="name">{{food.name}}</span>
+                <div class="price">
+                  <span>￥{{food.price}}</span>
+                </div>
+                <div class="cartcontrol-wrapper">
+                  <cartcontrol :food="food" :update-food-count="updateFoodCount"></cartcontrol>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </transition>
     </div>
-    <div class="ball-container">
-
-    </div>
-    <div class="shopcart-list" v-show="listShow">
-      <div class="list-header">
-        <h1 class="title">购物车</h1>
-        <span class="empty" @click="clear">清空</span>
-      </div>
-      <div class="list-content" ref="listContent">
-        <ul>
-          <li class="food" v-for="food in foodList">
-            <span class="name">{{food.name}}</span>
-            <div class="price">
-              <span>￥{{food.price}}</span>
-            </div>
-            <div class="cartcontrol-wrapper">
-              <cartcontrol :food="food" :update-food-count="updateFoodCount"></cartcontrol>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <!-- <div class="list-mask"></div> -->
+    <transition name="fade">
+      <div class="list-mask" v-show="listShow" @click="toogleList"></div>
+    </transition>
   </div>
+  
 </template>
 
 <script>
@@ -55,7 +70,13 @@
     },
     data(){
       return{
-        isShow:false
+        isShow:false,
+        balls:[
+          {isShow: false},
+          {isShow: false},
+          {isShow: false}
+        ],
+        droppingBalls:[]  //保存多个执行动画的ball
       }
     },
     computed:{
@@ -112,10 +133,8 @@
     },
     methods:{
       //列表的显示切换
-      toggleList(){
-        if(this.foodList.length){
-          this.isShow = !this.isShow
-        }
+      toogleList () {
+        this.isShow = !this.isShow
       },
       //支付多少钱
       pay(){
@@ -129,6 +148,65 @@
           //触发事件
           this.$emit('clear',this.foodList);
         }
+      },
+
+      // 让一个隐藏的小球启动一个显示的动画
+      drop (startEl) {
+        // 找到隐藏的小球
+        const ball = this.balls.find(ball => !ball.isShow)
+        // 显示它
+        if(ball) {
+          ball.isShow = true
+          ball.startEl = startEl
+          this.droppingBalls.push(ball)
+        }
+      },
+
+      //指定el的起始位置
+      beforeDrop(el){
+        // console.log('before()',Date.now())
+        //找到对应的ball
+        const ball = this.droppingBalls.shift() //移除第一个
+
+        var offsetY = 0
+        var offsetX = 0
+        //计算
+        const {left, top} = ball.startEl.getBoundingClientRect()
+        const elLeft = 32
+        const elBottom = 22
+        offsetX = left - elLeft
+        offsetY = -(window.innerHeight - top - elBottom)
+
+        // 指定transform样式
+        el.style.transform = `translate3d(0, ${offsetY}px, 0)`
+        el.children[0].style.transform = `translate3d(${offsetX}px, 0, 0)`
+
+        // 保存ball
+        el.ball = ball
+      },
+      /*
+      指定el的结束位置
+       */
+      dropping (el) {
+        // 强制重排重绘
+        var temp = el.clientHeight
+        // console.log('dropping()', Date.now())
+        // 异步指定
+        this.$nextTick(() => {
+          // 指定transform样式
+          el.style.transform = 'translate3d(0, 0, 0)'
+          el.children[0].style.transform = 'translate3d(0, 0, 0)'
+        })
+      },
+      /*
+      隐藏el
+       */
+      afterDrop (el) {
+        // console.log('afterDrop()', Date.now())
+        // 必须延迟更新状态
+        setTimeout(() => {
+          el.ball.isShow = false
+        }, 400)
       }
     },
     components:{
@@ -139,6 +217,7 @@
 
 <style lang="stylus" rel="stylesheet/stylus">
   @import "../../common/stylus/mixins.styl"
+
   .shopcart
     position: fixed
     left: 0
@@ -245,10 +324,10 @@
       z-index: -1
       width: 100%
       transform: translate3d(0, -100%, 0) /*显示时的状态*/
-      // &.fold-enter-active, &.fold-leave-active
-      //   transition: all 0.5s
-      // &.fold-enter, &.fold-leave-active
-      //   transform: translate3d(0, 0, 0)
+      &.fold-enter-active, &.fold-leave-active
+        transition: all 0.5s
+      &.fold-enter, &.fold-leave-active
+        transform: translate3d(0, 0, 0)
       .list-header
         height: 40px
         line-height: 40px
@@ -301,10 +380,9 @@
     backdrop-filter: blur(10px)
     opacity: 1
     background: rgba(7, 17, 27, 0.6)
-    // &.fade-enter-active, &.fade-leave-active
-    //   transition: all 0.5s
-    // &.fade-enter, &.fade-leave-active
-    //   opacity: 0
-    //   background: rgba(7, 17, 27, 0)
-
+    &.fade-enter-active, &.fade-leave-active
+      transition: all 0.5s
+    &.fade-enter, &.fade-leave-active
+      opacity: 0
+      background: rgba(7, 17, 27, 0)
 </style>
