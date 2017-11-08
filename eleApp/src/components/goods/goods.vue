@@ -14,7 +14,7 @@
         <li class="food-list food-list-hook" v-for="item in goods">
           <h1 class="title">{{item.name}}</h1>
           <ul>
-            <li class="food-item border-1px" v-for="food in item.foods">
+            <li class="food-item border-1px" v-for="food in item.foods" @click="clickFood(food,$event)">
               <div class="icon">
                 <img width="57" height="57" :src="food.icon">
               </div>
@@ -41,44 +41,50 @@
     <shopcart :food-list="foodList"
               :delivery-price="seller.deliveryPrice"
               :min-price="seller.minPrice"
-              @clear=""
               :update-food-count="updateFoodCount"
-              ></shopcart>
+              @clear="clearCart"
+              ref="shopcart"></shopcart>
+    <food :food="selectFood" :update-food-count="updateFoodCount" ref="food"></food>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 import BScroll from 'better-scroll'
 import Vue from 'vue'
 
 import cartcontrol from '../../components/cartcontrol/carcontrol'
 import shopcart from '../../components/shopcart/shopcart'
+import food from '../food/food'
 
+const OK = 0
 export default {
   props:['seller'],
   data(){
     return {
       goods:[],
       tops:[],
-      scrollY:[]
+      scrollY:[],
+      selectFood:{}
     }
   },
   created(){
     this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
-    this.$http.get('/api2/goods').then((response) => {
-      const result = response.body;
-      console.log(result);
-      if(result.code === 0){
-        this.goods = result.data;
-        //将回调延迟到下次DOM更新循环之后执行 
-        this.$nextTick(() => {
-          //初始化滚动条
-          this._initScroll()
-          // 读取右侧所有分类的top值
-          this._initTops()
-        })
-      }
-    })
+    axios.get('/api2/goods')
+      .then(response => {
+        const result = response.data
+        if (result.code === OK) {
+          this.goods = result.data
+          //在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
+          Vue.nextTick(() => {
+            //初始化滚动条
+            this._initScroll()
+            // 读取右侧所有分类的top值
+            this._initTops()
+          })
+
+        }
+      })
   },
   methods:{
     _initScroll(){
@@ -137,6 +143,22 @@ export default {
         if(food.count)
         food.count --
       }
+    },
+    //清空购物车
+    clearCart(){
+      this.foodList.forEach(function(food) {
+        food.count = 0;
+      });
+    },
+    clickFood (food, event) {
+      if(!event._constructed) {
+        return
+      }
+
+      // 更新food
+      this.selectFood = food
+      //显示food组件
+      this.$refs.food.show(true)
     }
   },
   computed:{
@@ -145,7 +167,7 @@ export default {
         return this.scrollY >= top && this.scrollY < this.tops[index + 1]
       })
     },
-    foodList () { // 返回所有count>0的food的数组
+    foodList () { // 返回所有count>0的food的数组(即要结账的物品)
       const foods = []
       this.goods.forEach(good => {
         good.foods.forEach(food => {
@@ -159,7 +181,8 @@ export default {
   },
   components:{
     cartcontrol,
-    shopcart
+    shopcart,
+    food
   }
 }
 </script>

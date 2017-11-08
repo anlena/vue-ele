@@ -1,7 +1,7 @@
 <template>
   <div class="shopcart">
     <div class="content">
-      <div class="content-left">
+      <div class="content-left" @click="toggleList">
         <div class="logo-wrapper">
           <div class="logo" :class="{highlight:foodList.length}">
             <i class="icon-shopping_cart highlight"></i>
@@ -11,7 +11,7 @@
         <div class="price">￥{{totalPrice}}</div>
         <div class="desc">另需配送费￥{{deliveryPrice}}元</div>
       </div>
-      <div class="content-right">
+      <div class="content-right" @click="pay">
         <div class="pay" :class="payClass">{{payText}}</div>
       </div>
     </div>
@@ -19,11 +19,11 @@
 
     </div>
     <div class="shopcart-list" v-show="listShow">
-      <div class="list-headr">
+      <div class="list-header">
         <h1 class="title">购物车</h1>
-        <span class="empty">清空</span>
+        <span class="empty" @click="clear">清空</span>
       </div>
-      <div class="list-content">
+      <div class="list-content" ref="listContent">
         <ul>
           <li class="food" v-for="food in foodList">
             <span class="name">{{food.name}}</span>
@@ -31,7 +31,7 @@
               <span>￥{{food.price}}</span>
             </div>
             <div class="cartcontrol-wrapper">
-              <cartcontrol :update-food-count="updateFoodCount"></cartcontrol>
+              <cartcontrol :food="food" :update-food-count="updateFoodCount"></cartcontrol>
             </div>
           </li>
         </ul>
@@ -55,10 +55,11 @@
     },
     data(){
       return{
-
+        isShow:false
       }
     },
     computed:{
+      //购买的物品数量
       totalCount(){
         var count = 0;
         this.foodList.forEach(function(food) {
@@ -66,6 +67,7 @@
         });
         return count
       },
+      //购买的物品总价值
       totalPrice(){
         var price = 0;
         this.foodList.forEach(function(food) {
@@ -73,6 +75,7 @@
         });
         return price
       },
+      //结算按钮里的值计算
       payText () {
         if(this.totalCount===0) {
           return `￥${this.minPrice}元起送`
@@ -82,19 +85,21 @@
           return '去结算'
         }
       },
+      //购物车的颜色
       payClass(){
-        return this.totalPrice<this.minPrice ? 'not-enough' : 'enough'
+        return this.totalPrice < this.minPrice ? 'not-enough' : 'enough'
       },
+      //
       listShow () {
         if(this.foodList.length===0) {
           this.isShow = false
           return false
         }
-
+        //给购物列表添加滚动
         if(this.isShow) {
           this.$nextTick(() => {// 延迟到界面更新完成后调用
             if(!this.scroll) {
-              this.scroll = new BScroll(this.$refs.listContent, {
+              Vue.scroll = new BScroll(this.$refs.listContent, {
                 click: true
               })
             } else {
@@ -103,6 +108,27 @@
           })
         }
         return this.isShow
+      }
+    },
+    methods:{
+      //列表的显示切换
+      toggleList(){
+        if(this.foodList.length){
+          this.isShow = !this.isShow
+        }
+      },
+      //支付多少钱
+      pay(){
+        if(this.totalPrice - this.minPrice >= 0){
+          alert(`支付${this.totalPrice + this.deliveryPrice}`)
+        }
+      },
+      //清空购物车
+      clear(){
+        if(confirm('确定清空购物车吗？')){
+          //触发事件
+          this.$emit('clear',this.foodList);
+        }
       }
     },
     components:{
