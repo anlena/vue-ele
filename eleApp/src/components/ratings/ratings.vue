@@ -31,7 +31,7 @@
                       @switchOnlyContent="switchOnlyContent"></ratingselect>
       <div class="rating-wrapper">
           <ul>
-            <li class="rating-item" v-for="rating in ratings" v-show="needShow(rating)">
+            <li class="rating-item" v-for="rating in filterRatings" v-show="needShow(rating)">
               <div class="avatar">
                 <img width="28" height="28" :src="rating.avatar">
               </div>
@@ -98,22 +98,23 @@ export default {
       })
   },
   methods:{
+    //向父组件发送事件
     setSelectType (selectType) {
       this.selectType = selectType
 
-      this.$nextTick(() => {
-        // 刷新列表的Scroll对象
-        this.scroll.refresh()
-      })
+      // this.$nextTick(() => {
+      //   // 刷新列表的Scroll对象
+      //   this.scroll.refresh()
+      // })
     },
 
+    //向父组件发送事件
     switchOnlyContent () {
       this.onlyContent = !this.onlyContent
-
-      this.$nextTick(() => {
-        // 刷新列表的Scroll对象
-        this.scroll.refresh()
-      })
+      // this.$nextTick(() => {
+      //   // 刷新列表的Scroll对象
+      //   this.scroll.refresh()
+      // })
     },
     needShow (rating) {
         // console.log('needShow()')
@@ -127,6 +128,7 @@ export default {
         }
       }
   },
+  //过滤器，使用了monment插件
   filters: {
     dateString (value) { // 1999-08-08 09:09:08
       return moment(value).format('YYYY-MM-DD HH:mm:ss')

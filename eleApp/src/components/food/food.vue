@@ -105,24 +105,25 @@
           })
         }
       },
-      //更新selectType
+      //更新selectType(评价分类更新)
       setSelectType (selectType) {
         this.selectType = selectType
-        this.$nextTick(() => {
-          // 刷新列表的Scroll对象
-          this.scroll.refresh()
-        })
+        // this.$nextTick(() => {
+        //   // 刷新列表的Scroll对象
+        //   this.scroll.refresh()
+        // })
       },
-      //切换onlyContent
+      //切换onlyContent(只显示内容按钮)
       switchOnlyContent () {
         this.onlyContent = !this.onlyContent
-        this.$nextTick(() => {
-          // 刷新列表的Scroll对象
-          this.scroll.refresh()
-        })
+        // this.$nextTick(() => {
+        //   // 刷新列表的Scroll对象
+        //   this.scroll.refresh()
+        // })
       }
     },
     computed: {
+      //过滤评价分类
       filterRatings () {
         // 如果还没有数据, 结束
         if(!this.food.ratings) {

@@ -98,6 +98,7 @@ export default {
     this._initScroll()
   },
   methods:{
+    //喜爱按钮存值
     toggle ($event) {
       if(!$event._constructed) {
         return
@@ -106,6 +107,7 @@ export default {
       //保存
       localStorage.setItem('favorite', this.favorite)
     },
+    //地图页图片大小控制，和横向滚动
     _initScroll () {
       this.$nextTick(() => {
         new BScroll(this.$refs.seller, {

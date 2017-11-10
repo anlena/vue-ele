@@ -30,6 +30,7 @@
                   <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
                 </div>
                 <div class="cartcontrol-wrapper">
+                  <!-- 加减符号 -->
                   <cartcontrol :food="food" :update-food-count="updateFoodCount"></cartcontrol>
                 </div>
               </div>
@@ -38,12 +39,14 @@
         </li>
       </ul>
     </div>
+    <!-- 购物车组件 -->
     <shopcart :food-list="foodList"
               :delivery-price="seller.deliveryPrice"
               :min-price="seller.minPrice"
               :update-food-count="updateFoodCount"
               @clear="clearCart"
               ref="shopcart"></shopcart>
+    <!-- 物品详情 -->
     <food :food="selectFood" :update-food-count="updateFoodCount" ref="food"></food>
   </div>
 </template>
@@ -87,6 +90,7 @@ export default {
       })
   },
   methods:{
+    //绑定better-scroll
     _initScroll(){
       this.menuScroll = new BScroll(this.$refs.menuWrapper,{
         click:true
@@ -101,6 +105,7 @@ export default {
         this.scrollY = Math.abs(pos.y)
       })
     },
+    //获取所有分类距离顶部的top值
      _initTops(){
       const foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
       let top = 0;
@@ -112,6 +117,7 @@ export default {
       }
       // console.log(this.tops)
     },
+    //点击分类，右侧滚动到相应位置
     clickMenuItem(index,event){
        // 过滤掉原生DOM事件
       // console.log(event._constructed,-this.tops[index])
@@ -121,8 +127,10 @@ export default {
       // console.log(index,event);
       //将右侧移到对应的位置
       var li = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook')[index]
+      //300，代表动画时间
       this.foodsScroll.scrollToElement(li, 300)
     },
+    //加减符号操作商品数量
     updateFoodCount(food,isAdd,event){
       //过滤点击回调
       if(!event._constructed){
@@ -150,18 +158,20 @@ export default {
         food.count = 0;
       });
     },
+    //打开商品详情
     clickFood (food, event) {
       if(!event._constructed) {
         return
       }
 
-      // 更新food
+      // 拿到food值传到food组件
       this.selectFood = food
       //显示food组件
       this.$refs.food.show(true)
     }
   },
   computed:{
+    //左侧分类栏对应的样式
     currentIndex(){
       return this.tops.findIndex((top,index) => {
         return this.scrollY >= top && this.scrollY < this.tops[index + 1]
